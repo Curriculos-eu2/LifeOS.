@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life OS — Sistema de Organização Pessoal no Notion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0d0b;
+    --bg2: #161410;
+    --bg3: #1c1a16;
+    --cream: #f0ead8;
+    --cream2: #c9bfa4;
+    --amber: #c8922a;
+    --amber-light: #e8b04a;
+    --amber-dim: rgba(200, 146, 42, 0.12);
+    --border: rgba(240, 234, 216, 0.08);
+    --border2: rgba(240, 234, 216, 0.14);
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 3rem;
+    background: rgba(14, 13, 11, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--cream);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--amber); }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.85rem; font-weight: 400; letter-spacing: 0.04em;
+    color: var(--cream2); text-decoration: none; text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--cream); }
+  .nav-cta {
+    font-size: 0.85rem; font-weight: 500; letter-spacing: 0.06em;
+    color: var(--bg); background: var(--amber);
+    text-decoration: none; text-transform: uppercase;
+    padding: 0.55rem 1.4rem; border-radius: 2px;
+    transition: background 0.2s;
+  }
+  .nav-cta:hover { background: var(--amber-light); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 3rem 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(200, 146, 42, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200, 146, 42, 0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  }
+  .hero-glow {
+    position: absolute; top: 30%; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(200, 146, 42, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 0.78rem; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--amber);
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 0.8rem;
+  }
+  .hero-eyebrow::before {
+    content: ''; display: block;
+    width: 32px; height: 1px; background: var(--amber);
+  }
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 300;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: var(--cream);
+    max-width: 800px;
+    margin-bottom: 2rem;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--amber-light);
+  }
+  .hero-body {
+    font-size: 1.05rem; font-weight: 300;
+    color: var(--cream2); line-height: 1.8;
+    max-width: 480px;
+    margin-bottom: 3rem;
+  }
+  .hero-actions { display: flex; align-items: center; gap: 2rem; }
+  .btn-primary {
+    font-family: var(--sans); font-size: 0.9rem; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--bg); background: var(--amber);
+    text-decoration: none;
+    padding: 0.9rem 2.4rem; border-radius: 2px;
+    transition: background 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--amber-light); transform: translateY(-1px); }
+  .btn-ghost {
+    font-size: 0.9rem; font-weight: 400; letter-spacing: 0.04em;
+    color: var(--cream2); text-decoration: none;
+    display: flex; align-items: center; gap: 0.5rem;
+    transition: color 0.2s;
+  }
+  .btn-ghost:hover { color: var(--cream); }
+  .btn-ghost::after { content: '↓'; font-size: 1rem; }
+  .hero-stat-row {
+    position: absolute; bottom: 5rem; right: 3rem;
+    display: flex; flex-direction: column; gap: 1.5rem;
+    text-align: right;
+  }
+  .hero-stat-num {
+    font-family: var(--serif); font-size: 2.5rem; font-weight: 300;
+    color: var(--cream); line-height: 1;
+  }
+  .hero-stat-label {
+    font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--cream2);
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px; background: var(--border);
+    margin: 0 3rem;
+  }
+
+  /* PILLARS */
+  .pillars {
+    padding: 6rem 3rem;
+    display: grid; grid-template-columns: 1fr 2fr; gap: 5rem;
+    align-items: start;
+  }
+  .section-label {
+    font-size: 0.75rem; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--amber);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: var(--serif); font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 300; line-height: 1.15;
+    color: var(--cream);
+  }
+  .pillars-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+  .pillar {
+    background: var(--bg2);
+    padding: 2.5rem 2rem;
+    border-top: 2px solid var(--border);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .pillar:hover { border-color: var(--amber); background: var(--bg3); }
+  .pillar-num {
+    font-family: var(--serif); font-size: 3rem; font-weight: 300;
+    color: var(--amber); line-height: 1; margin-bottom: 1.5rem;
+  }
+  .pillar-name {
+    font-family: var(--serif); font-size: 1.4rem; font-weight: 400;
+    color: var(--cream); margin-bottom: 0.75rem;
+  }
+  .pillar-text { font-size: 0.9rem; font-weight: 300; color: var(--cream2); line-height: 1.7; }
+
+  /* MODULES */
+  .modules-section { padding: 4rem 3rem 6rem; }
+  .modules-header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 3rem;
+  }
+  .modules-header-left { }
+  .modules-count {
+    font-family: var(--serif); font-size: 5rem; font-weight: 300;
+    color: var(--border2); line-height: 1; align-self: flex-end;
+  }
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .module-card {
+    background: var(--bg2);
+    padding: 2rem 2rem 2.5rem;
+    border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+    cursor: default;
+    transition: background 0.25s, border-color 0.25s;
+  }
+  .module-card:hover { background: var(--bg3); border-color: var(--border2); }
+  .module-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 2px; background: var(--amber);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .module-card:hover::before { transform: scaleX(1); }
+  .module-icon {
+    font-size: 1.5rem; margin-bottom: 1rem;
+    display: block;
+  }
+  .module-num {
+    position: absolute; top: 1.5rem; right: 1.5rem;
+    font-family: var(--serif); font-size: 0.85rem;
+    color: var(--border2); letter-spacing: 0.05em;
+  }
+  .module-name {
+    font-family: var(--serif); font-size: 1.35rem; font-weight: 400;
+    color: var(--cream); margin-bottom: 0.5rem;
+  }
+  .module-tag {
+    display: inline-block;
+    font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--amber);
+    border: 1px solid var(--amber-dim);
+    padding: 0.2rem 0.6rem; border-radius: 2px;
+    margin-bottom: 1rem;
+    background: var(--amber-dim);
+  }
+  .module-text { font-size: 0.88rem; font-weight: 300; color: var(--cream2); line-height: 1.7; }
+  .module-features {
+    margin-top: 1.2rem; display: flex; flex-direction: column; gap: 0.35rem;
+  }
+  .module-feat {
+    font-size: 0.8rem; color: var(--cream2);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .module-feat::before {
+    content: ''; display: block; width: 14px; height: 1px;
+    background: var(--amber); flex-shrink: 0;
+  }
+  .module-card.wide { grid-column: span 2; }
+  .module-card.wide .module-inner {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+  }
+
+  /* QUOTE */
+  .quote-section {
+    padding: 6rem 3rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    display: grid; grid-template-columns: 1fr 2fr; gap: 4rem;
+    align-items: center;
+  }
+  .quote-label { font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cream2); }
+  .quote-text {
+    font-family: var(--serif); font-size: clamp(1.4rem, 3vw, 2.2rem);
+    font-weight: 300; font-style: italic; line-height: 1.4;
+    color: var(--cream);
+  }
+  .quote-text em { color: var(--amber-light); font-style: normal; }
+
+  /* PHASES */
+  .phases-section { padding: 6rem 3rem; }
+  .phases-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 3rem; }
+  .phase {
+    padding: 2.5rem 2rem;
+    background: var(--bg2);
+    border-left: 1px solid var(--border);
+    position: relative;
+  }
+  .phase:first-child { border-left: none; }
+  .phase-num {
+    font-family: var(--serif); font-size: 4rem; font-weight: 300;
+    color: var(--amber-dim); line-height: 1; margin-bottom: 1.5rem;
+    -webkit-text-stroke: 1px var(--amber);
+    color: transparent;
+  }
+  .phase-title {
+    font-family: var(--serif); font-size: 1.4rem; font-weight: 400;
+    color: var(--cream); margin-bottom: 0.5rem;
+  }
+  .phase-period {
+    font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--amber); margin-bottom: 1rem;
+  }
+  .phase-text { font-size: 0.88rem; font-weight: 300; color: var(--cream2); line-height: 1.7; }
+  .phase-items { margin-top: 1.2rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .phase-item { font-size: 0.82rem; color: var(--cream2); display: flex; align-items: flex-start; gap: 0.6rem; }
+  .phase-item::before { content: '›'; color: var(--amber); flex-shrink: 0; margin-top: -1px; }
+
+  /* RULES */
+  .rules-section {
+    padding: 5rem 3rem;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+  }
+  .rules-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-top: 3rem; }
+  .rule { border-top: 1px solid var(--border2); padding-top: 1.5rem; }
+  .rule-num {
+    font-family: var(--serif); font-size: 0.85rem; color: var(--amber);
+    margin-bottom: 0.75rem; letter-spacing: 0.05em;
+  }
+  .rule-text { font-size: 0.9rem; font-weight: 300; color: var(--cream2); line-height: 1.65; }
+
+  /* CTA */
+  .cta-section {
+    padding: 8rem 3rem;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .cta-glow {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 700px; height: 400px;
+    background: radial-gradient(ellipse, rgba(200, 146, 42, 0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-title {
+    font-family: var(--serif); font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 300; line-height: 1.1; margin-bottom: 1.5rem;
+    color: var(--cream);
+  }
+  .cta-title em { font-style: italic; color: var(--amber-light); }
+  .cta-sub { font-size: 1rem; color: var(--cream2); max-width: 460px; margin: 0 auto 3rem; font-weight: 300; }
+  .cta-button {
+    font-family: var(--sans); font-size: 1rem; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--bg); background: var(--amber);
+    text-decoration: none; display: inline-block;
+    padding: 1.1rem 3rem; border-radius: 2px;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .cta-button:hover { background: var(--amber-light); transform: translateY(-2px); }
+  .cta-note { font-size: 0.8rem; color: var(--cream2); margin-top: 1.2rem; opacity: 0.7; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 3rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .footer-logo {
+    font-family: var(--serif); font-size: 1.1rem;
+    color: var(--cream2); letter-spacing: 0.02em;
+  }
+  .footer-logo span { color: var(--amber); }
+  .footer-note { font-size: 0.78rem; color: var(--cream2); opacity: 0.5; }
+
+  /* ANIMATIONS */
+  .reveal {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    nav { padding: 1.25rem 1.5rem; }
+    .nav-links { display: none; }
+    .hero, .pillars, .modules-section, .phases-section,
+    .quote-section, .rules-section, .cta-section, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .pillars { grid-template-columns: 1fr; gap: 3rem; }
+    .pillars-grid { grid-template-columns: 1fr; gap: 2px; }
+    .modules-grid { grid-template-columns: 1fr; }
+    .module-card.wide { grid-column: span 1; }
+    .module-card.wide .module-inner { grid-template-columns: 1fr; }
+    .phases-grid { grid-template-columns: 1fr; }
+    .rules-grid { grid-template-columns: repeat(2, 1fr); }
+    .quote-section { grid-template-columns: 1fr; gap: 1.5rem; }
+    .hero-stat-row { display: none; }
+    .modules-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+    .divider { margin: 0 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Life<span>OS</span></a>
+  <ul class="nav-links">
+    <li><a href="#modulos">Módulos</a></li>
+    <li><a href="#filosofia">Filosofia</a></li>
+    <li><a href="#fases">Como Começar</a></li>
+  </ul>
+  <a href="#cta" class="nav-cta">Obter o Sistema</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+
+  <p class="hero-eyebrow reveal">Sistema de Organização Pessoal no Notion</p>
+
+  <h1 class="hero-title reveal reveal-delay-1">
+    O controlo total<br>
+    da tua <em>vida</em>,<br>
+    num só lugar.
+  </h1>
+
+  <p class="hero-body reveal reveal-delay-2">
+    Um sistema completo desenhado para profissionais, freelancers e estudantes europeus que querem clareza, consistência e controlo — sem complexidade desnecessária.
+  </p>
+
+  <div class="hero-actions reveal reveal-delay-3">
+    <a href="#cta" class="btn-primary">Começar agora</a>
+    <a href="#modulos" class="btn-ghost">Ver o sistema</a>
+  </div>
+
+  <div class="hero-stat-row reveal reveal-delay-4">
+    <div>
+      <div class="hero-stat-num">9</div>
+      <div class="hero-stat-label">módulos integrados</div>
+    </div>
+    <div>
+      <div class="hero-stat-num">3</div>
+      <div class="hero-stat-label">pilares fundamentais</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PILLARS -->
+<section class="pillars" id="filosofia">
+  <div>
+    <p class="section-label reveal">Filosofia</p>
+    <h2 class="section-title reveal reveal-delay-1">
+      Construído sobre três verdades simples.
+    </h2>
+  </div>
+
+  <div class="pillars-grid">
+    <div class="pillar reveal">
+      <div class="pillar-num">01</div>
+      <div class="pillar-name">Clareza</div>
+      <p class="pillar-text">Sabes sempre o que fazer a seguir, sem hesitação. O sistema elimina a ambiguidade e coloca a próxima ação à frente dos teus olhos.</p>
+    </div>
+    <div class="pillar reveal reveal-delay-1">
+      <div class="pillar-num">02</div>
+      <div class="pillar-name">Controlo</div>
+      <p class="pillar-text">Nada cai pelas fendas. Cada tarefa, ideia, hábito e euro tem o seu lugar exacto. A mente fica livre para pensar, não para lembrar.</p>
+    </div>
+    <div class="pillar reveal reveal-delay-2">
+      <div class="pillar-num">03</div>
+      <div class="pillar-name">Consistência</div>
+      <p class="pillar-text">O sistema foi desenhado para o teu pior dia. Um sistema que só funciona com energia máxima não é um sistema — é uma aspiração.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MODULES -->
+<section class="modules-section" id="modulos">
+  <div class="modules-header">
+    <div class="modules-header-left">
+      <p class="section-label reveal">O Sistema</p>
+      <h2 class="section-title reveal reveal-delay-1">Nove módulos.<br>Um ecossistema.</h2>
+    </div>
+    <div class="modules-count reveal">09</div>
+  </div>
+
+  <div class="modules-grid">
+
+    <div class="module-card reveal">
+      <span class="module-num">01</span>
+      <span class="module-icon">🏠</span>
+      <div class="module-name">Dashboard Principal</div>
+      <div class="module-tag">Centro de Comando</div>
+      <p class="module-text">O teu cockpit diário. Em 60 segundos vês o que é urgente, o que está pendente e como estás a semana.</p>
+      <div class="module-features">
+        <span class="module-feat">Top 3 prioridades do dia</span>
+        <span class="module-feat">Hábitos e tarefas de hoje</span>
+        <span class="module-feat">Visão financeira do mês</span>
+      </div>
+    </div>
+
+    <div class="module-card reveal reveal-delay-1">
+      <span class="module-num">02</span>
+      <span class="module-icon">✅</span>
+      <div class="module-name">Gestão de Tarefas</div>
+      <div class="module-tag">Produtividade</div>
+      <p class="module-text">Uma única fonte de verdade para tudo o que precisas de fazer, organizada por prioridade, contexto e energia.</p>
+      <div class="module-features">
+        <span class="module-feat">5 vistas (lista, kanban, calendário)</span>
+        <span class="module-feat">Filtro por contexto e energia</span>
+        <span class="module-feat">Ligação directa às metas</span>
+      </div>
+    </div>
+
+    <div class="module-card reveal reveal-delay-2">
+      <span class="module-num">03</span>
+      <span class="module-icon">📅</span>
+      <div class="module-name">Planeamento Semanal</div>
+      <div class="module-tag">Ritmo & Intenção</div>
+      <p class="module-text">A semana é a unidade ideal de planeamento. Define um tema, os teus Top 3 e cria ritmo sustentável.</p>
+      <div class="module-features">
+        <span class="module-feat">Tema da semana</span>
+        <span class="module-feat">Top 3 objetivos semanais</span>
+        <span class="module-feat">Blocos de deep work</span>
+      </div>
+    </div>
+
+    <div class="module-card reveal">
+      <span class="module-num">04</span>
+      <span class="module-icon">🎯</span>
+      <div class="module-name">Sistema de Metas</div>
+      <div class="module-tag">Visão de Longo Prazo</div>
+      <p class="module-text">Hierarquia anual → trimestral → mensal → tarefas. Transforma sonhos vagos em projetos concretos.</p>
+      <div class="module-features">
+        <span class="module-feat">Hierarquia de 3 níveis</span>
+        <span class="module-feat">Critério mensurável obrigatório</span>
+        <span class="module-feat">Tracking de progresso (%)</span>
+      </div>
+    </div>
+
+    <div class="module-card reveal reveal-delay-1">
+      <span class="module-num">05</span>
+      <span class="module-icon">🔥</span>
+      <div class="module-name">Habit Tracker</div>
+      <div class="module-tag">Psicologia Comportamental</div>
+      <p class="module-text">Baseado em Atomic Habits. Sistema de streak, identidade e hábito âncora para consistência real.</p>
+      <div class="module-features">
+        <span class="module-feat">Sistema de streak visual</span>
+        <span class="module-feat">Regra dos 66 dias</span>
+        <span class="module-feat">Catálogo de hábitos ativos</span>
+      </div>
+    </div>
+
+    <div class="module-card reveal reveal-delay-2">
+      <span class="module-num">06</span>
+      <span class="module-icon">💶</span>
+      <div class="module-name">Controlo Financeiro</div>
+      <div class="module-tag">Finanças Pessoais</div>
+      <p class="module-text">Visão clara das entradas e saídas. Categorias europeias, saldo automático e revisão mensal guiada.</p>
+      <div class="module-features">
+        <span class="module-feat">Categorias inteligentes (€)</span>
+        <span class="module-feat">Regra 50/30/20</span>
+        <span class="module-feat">Vista de despesas recorrentes</span>
+      </div>
+    </div>
+
+    <div class="module-card reveal">
+      <span class="module-num">07</span>
+      <span class="module-icon">💡</span>
+      <div class="module-name">Brain Dump</div>
+      <div class="module-tag">Captura de Ideias</div>
+      <p class="module-text">Esvazia a mente sem julgamento. Processa semanalmente e converte em tarefas ou arquiva.</p>
+      <div class="module-features">
+        <span class="module-feat">Captura em 30 segundos</span>
+        <span class="module-feat">Workflow de processamento GTD</span>
+        <span class="module-feat">Ligação à BD de Tarefas</span>
+      </div>
+    </div>
+
+    <div class="module-card reveal reveal-delay-1">
+      <span class="module-num">08</span>
+      <span class="module-icon">📓</span>
+      <div class="module-name">Diário Pessoal</div>
+      <div class="module-tag">Clareza Mental</div>
+      <p class="module-text">Templates de manhã e noite baseados em neurociência positiva. Gratidão, reflexão e intenção diária.</p>
+      <div class="module-features">
+        <span class="module-feat">Ritual de manhã (5 min)</span>
+        <span class="module-feat">Reflexão noturna (5 min)</span>
+        <span class="module-feat">Vista de padrões emocionais</span>
+      </div>
+    </div>
+
+    <div class="module-card reveal reveal-delay-2">
+      <span class="module-num">09</span>
+      <span class="module-icon">🔍</span>
+      <div class="module-name">Weekly Review</div>
+      <div class="module-tag">O Ritual Mais Importante</div>
+      <p class="module-text">45 min por semana de limpeza, reflexão e planeamento. O ritual que mantém o sistema vivo.</p>
+      <div class="module-features">
+        <span class="module-feat">4 fases estruturadas</span>
+        <span class="module-feat">7 perguntas de reflexão</span>
+        <span class="module-feat">Score semanal 1–10</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- QUOTE -->
+<section class="quote-section">
+  <div class="reveal">
+    <p class="quote-label">Princípio Orientador</p>
+  </div>
+  <blockquote class="quote-text reveal reveal-delay-1">
+    "Um sistema que só funciona quando tens energia máxima não é um sistema — é uma <em>aspiração</em>. O Life OS foi desenhado para o teu pior dia."
+  </blockquote>
+</section>
+
+<!-- PHASES -->
+<section class="phases-section" id="fases">
+  <p class="section-label reveal">Implementação</p>
+  <h2 class="section-title reveal reveal-delay-1">Começa sem pressão.<br>Em três fases.</h2>
+
+  <div class="phases-grid">
+    <div class="phase reveal">
+      <div class="phase-num">01</div>
+      <div class="phase-title">Fundações</div>
+      <div class="phase-period">Semana 1</div>
+      <p class="phase-text">Construíste as bases sem te sobrecarregar. Tudo começa com três bases de dados e uma semana.</p>
+      <div class="phase-items">
+        <div class="phase-item">Criar BD Tasks, Goals e Habits</div>
+        <div class="phase-item">Primeiro Weekly Planner</div>
+        <div class="phase-item">Começar o Journal diário</div>
+        <div class="phase-item">Sem ligações ainda — sem pressão</div>
+      </div>
+    </div>
+    <div class="phase reveal reveal-delay-1">
+      <div class="phase-num">02</div>
+      <div class="phase-title">Conexões</div>
+      <div class="phase-period">Semanas 2–3</div>
+      <p class="phase-text">O sistema começa a falar consigo próprio. As peças ligam-se e o Dashboard ganha vida.</p>
+      <div class="phase-items">
+        <div class="phase-item">Adicionar Finance e Brain Dump</div>
+        <div class="phase-item">Ligar Tasks → Goals e Weekly Planner</div>
+        <div class="phase-item">Primeiro Weekly Review completo</div>
+        <div class="phase-item">Montar o Dashboard com linked views</div>
+      </div>
+    </div>
+    <div class="phase reveal reveal-delay-2">
+      <div class="phase-num">03</div>
+      <div class="phase-title">Otimização</div>
+      <div class="phase-period">Mês 2 em diante</div>
+      <p class="phase-text">O sistema serve-te. Ajustas o que não funciona, sem culpa. É teu — molda-o à tua vida.</p>
+      <div class="phase-items">
+        <div class="phase-item">Ajustar o que cria fricção</div>
+        <div class="phase-item">Criar templates para entradas recorrentes</div>
+        <div class="phase-item">Avaliar o sistema mensalmente</div>
+        <div class="phase-item">Simplificar o que não usa</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RULES -->
+<section class="rules-section">
+  <p class="section-label reveal">7 Regras de Ouro</p>
+  <h2 class="section-title reveal reveal-delay-1">O manual de conduta<br>do Life OS.</h2>
+
+  <div class="rules-grid">
+    <div class="rule reveal">
+      <div class="rule-num">01 —</div>
+      <p class="rule-text">Captura tudo, decide depois. O Brain Dump existe exactamente para isso.</p>
+    </div>
+    <div class="rule reveal reveal-delay-1">
+      <div class="rule-num">02 —</div>
+      <p class="rule-text">Uma fonte de verdade. Tarefas vivem na BD Tasks, não em post-its, emails ou cabeça.</p>
+    </div>
+    <div class="rule reveal reveal-delay-2">
+      <div class="rule-num">03 —</div>
+      <p class="rule-text">Feito é melhor que perfeito. Um sistema imperfeito em uso vale mais que um sistema perfeito no papel.</p>
+    </div>
+    <div class="rule reveal reveal-delay-3">
+      <div class="rule-num">04 —</div>
+      <p class="rule-text">Revisa ou morre. Sem o Weekly Review, o sistema deteriora-se em semanas.</p>
+    </div>
+    <div class="rule reveal">
+      <div class="rule-num">05 —</div>
+      <p class="rule-text">O sistema serve-te, não o contrário. Se algo cria fricção, simplifica sem culpa.</p>
+    </div>
+    <div class="rule reveal reveal-delay-1">
+      <div class="rule-num">06 —</div>
+      <p class="rule-text">Menos é mais. 3 prioridades. 3 hábitos. 3 metas anuais. A restrição é uma feature.</p>
+    </div>
+    <div class="rule reveal reveal-delay-2">
+      <div class="rule-num">07 —</div>
+      <p class="rule-text">Celebra o progresso. O teu cérebro precisa de recompensas para manter o comportamento.</p>
+    </div>
+    <div class="rule reveal reveal-delay-3">
+      <div class="rule-num">∞ —</div>
+      <p class="rule-text">Evolução contínua. O Life OS não é um destino — é um processo de melhoria permanente.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="cta-glow"></div>
+  <h2 class="cta-title reveal">
+    Pronto para ter<br><em>controlo total</em><br>da tua vida?
+  </h2>
+  <p class="cta-sub reveal reveal-delay-1">
+    Descobre o guia completo do Life OS e começa a construir o teu sistema no Notion hoje.
+  </p>
+  <a href="#" class="cta-button reveal reveal-delay-2">Obter o Guia Completo</a>
+  <p class="cta-note reveal reveal-delay-3">Guia em português · Adaptado para profissionais europeus</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Life<span>OS</span> — Sistema de Organização Pessoal</div>
+  <div class="footer-note">Desenhado por uma equipa de especialistas em produtividade, finanças e psicologia comportamental.</div>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Animate hero immediately
+document.querySelectorAll('.hero .reveal').forEach((el, i) => {
+  setTimeout(() => el.classList.add('visible'), 100 + i * 120);
+});
+</script>
+</body>
+</html>
